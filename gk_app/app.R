@@ -11,8 +11,8 @@ df <- readxl::read_xlsx("~/Library/CloudStorage/GoogleDrive-aoife.ryan@sharecrea
   mutate_at(15:26, as.numeric) %>% # monthly searches stored as character
   mutate(yo_y_change = as.numeric(str_remove_all(yo_y_change, "%")),
          three_month_change = as.numeric(str_remove_all(three_month_change, "%")),
-         yo_y_change = yo_y_change/100,
-         three_month_change = three_month_change/100,
+         # yo_y_change = yo_y_change/100,
+         # three_month_change = three_month_change/100,
          avg_monthly_searches = as.numeric(avg_monthly_searches),
          log_avg_posts = log(avg_monthly_searches)) %>%
   dplyr::select(-c(competition:in_plan)) 
@@ -188,10 +188,13 @@ ui <- fluidPage(
                   selected = "three_month_change", multiple = FALSE),
       selectInput("keyword", "Search Term",
                   choices = unique(df$keyword), selected = NULL, multiple = TRUE),
-      sliderInput("num_posts", div(HTML("Number of Posts <i>(note log scale)</i>")),
+      conditionalPanel(condition = "input.chart_type == 1",
+        sliderInput("num_posts", div(HTML("Number of Posts <i>(note log scale)</i>")),
                   min = 0.1, max = 5, step = 0.05, value = c(0.1,5), round = TRUE, tick = FALSE),
       sliderInput("growth_range", "Growth (%)",
-                  min = -1.5, max = 5, value = c(-1.5,5), tick = FALSE),
+                  min = -1.5, max = ceiling(log10(max(df %>% select(avg_monthly_searches, jan:dec)))), 
+                  value = c(-1.5, ceiling(log10(max(df %>% select(avg_monthly_searches, jan:dec))))), 
+                  tick = FALSE)),
       selectInput("static_keyword_callout", "Static Chart Callouts",
                   choices = unique(df$keyword), selected = NULL, multiple = TRUE),
       actionButton("shuffle_label", "Shuffle Label Position")
@@ -201,11 +204,13 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(type = "tabs",
                   tabPanel("Dynamic Chart",
+                           absolutePanel(top = 10, right = 10, downloadButton("scatter_download")),
                            plotlyOutput("keyword_dynamic_plot"),
                            dataTableOutput("filter_selected_tab1"),
                            downloadButton("data_download_tab1"),
                            value = 1),
                   tabPanel("Volume Over Time",
+                           absolutePanel(top = 10, right = 10, downloadButton("vot_download")),
                            plotlyOutput("vot_plot"), dataTableOutput("filter_selected_tab2"),
                            downloadButton("data_download_tab2"), value = 2),
                   id = "chart_type")
@@ -215,6 +220,22 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  # observe({
+  #   max_xval <- ceiling(log10(max(df %>% select(avg_monthly_searches, jan:dec))))
+  #  
+  #   updateSliderInput(inputId = "num_posts", max = max_xval,
+  #                     value = c(0.1, max_xval))
+  #  
+  # })
+  
+  observe({
+    max_yval <- max(c(df$yo_y_change, df$three_month_change))
+    min_yval <- min(c(df$yo_y_change, df$three_month_change))
+    range_yval <- max_yval - min_yval
+    updateSliderInput(inputId = "growth_range", min = min_yval - range_yval*0.05, max = max_yval + range_yval*0.05,
+                      value = c(min_yval - range_yval*0.05, max_yval + range_yval*0.05))
+  })
   
   random_state <- shiny::eventReactive(input$shuffle_label, {
     sample(1:1000, 1)
@@ -328,7 +349,8 @@ server <- function(input, output) {
                       title = "Number of Posts*",
                       range = c(x_min(), x_max()),
                       zeroline = FALSE, showline = TRUE, mirror = TRUE),
-        yaxis = list(zeroline = FALSE, tickformat = ',.0%',
+        yaxis = list(zeroline = FALSE, 
+                     # tickformat = ',%',
                      showline = TRUE, mirror = TRUE,
                      range = c(input$growth_range),
                      title = "Growth"),
@@ -358,19 +380,19 @@ server <- function(input, output) {
   })
   
   display_table <- shiny::reactive({
-    if (!is.null(df_highlighted())) {
+    # if (!is.null(df_highlighted())) {
       selected_indices <- df_highlighted()$pointNumber
       plot_df()[selected_indices + 1, ] %>%
         select(keyword, "Average Monthly Searches" = avg_monthly_searches,
                "Three Month Growth" = three_month_change, "Year on Year Growth" = yo_y_change,
                !!!setNames(colnames(plot_df())[6:17], month.name))
       
-    } else {
-      plot_df() %>%
-        select(keyword, "Average Monthly Searches" = avg_monthly_searches,
-               "Three Month Growth" = three_month_change, "Year on Year Growth" = yo_y_change,
-               !!!setNames(colnames(plot_df())[6:17], month.name)) 
-    }
+    # } else {
+    #   plot_df() %>%
+    #     select(keyword, "Average Monthly Searches" = avg_monthly_searches,
+    #            "Three Month Growth" = three_month_change, "Year on Year Growth" = yo_y_change,
+    #            !!!setNames(colnames(plot_df())[6:17], month.name)) 
+    # }
   })
   
   output$filter_selected_tab1 <- DT::renderDataTable({
@@ -422,21 +444,27 @@ server <- function(input, output) {
       "data.csv"
     },
     content = function(file) {
-      time <- stringr::str_replace(Sys.time(), " ", "_")
-      write.csv(paste0(display_table(), time), file)
+      write.csv(display_table(), file)
     }
   )
   
-  output$data_download_tab12<- shiny::downloadHandler(
+  output$data_download_tab1 <- shiny::downloadHandler(
     filename = function() {
       "data.csv"
     },
     content = function(file) {
-      time <- stringr::str_replace(Sys.time(), " ", "_")
-      write.csv(paste0(display_table(), time), file)
+      write.csv(display_table(), file)
     }
   )
-
+  
+  output$data_download_tab1 <- shiny::downloadHandler(
+    filename = function() {
+      "data.csv"
+    },
+    content = function(file) {
+      write.csv(display_table(), file)
+    }
+  )
   
 }
 
