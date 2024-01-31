@@ -180,37 +180,37 @@ ui <- fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-      selectInput("xaxis", "x-axis timeframe:",
+      shiny::selectInput("xaxis", "x-axis timeframe:",
                   choices = c("Average monthly searches" = "avg_monthly_searches", setNames(tolower(month.abb), month.name)),
                   selected = "avg_monthly_searches", multiple = FALSE),
-      selectInput("yaxis", "Growth Metric:",
+      shiny::selectInput("yaxis", "Growth Metric:",
                   choices = c("Yearly growth" = "yo_y_change", "Three month growth" = "three_month_change"),
                   selected = "three_month_change", multiple = FALSE),
-      selectInput("keyword", "Search Term",
+      shiny::selectInput("keyword", "Search Term",
                   choices = unique(df$keyword), selected = NULL, multiple = TRUE),
-      conditionalPanel(condition = "input.chart_type == 1",
+      shiny::conditionalPanel(condition = "input.chart_type == 1",
         sliderInput("num_posts", div(HTML("Number of Posts <i>(note log scale)</i>")),
                   min = 0.1, max = 5, step = 0.05, value = c(0.1,5), round = TRUE, tick = FALSE),
       sliderInput("growth_range", "Growth (%)",
                   min = -1.5, max = ceiling(log10(max(df %>% select(avg_monthly_searches, jan:dec)))), 
                   value = c(-1.5, ceiling(log10(max(df %>% select(avg_monthly_searches, jan:dec))))), 
                   tick = FALSE)),
-      selectInput("static_keyword_callout", "Static Chart Callouts",
+      shiny::selectInput("static_keyword_callout", "Static Chart Callouts",
                   choices = unique(df$keyword), selected = NULL, multiple = TRUE),
       actionButton("shuffle_label", "Shuffle Label Position")
     ),
     
     # Show a plot of the generated distribution
     mainPanel(
-      tabsetPanel(type = "tabs",
+      shiny::tabsetPanel(type = "tabs",
                   tabPanel("Dynamic Chart",
-                           absolutePanel(top = 10, right = 10, downloadButton("scatter_download")),
+                           # absolutePanel(top = 10, right = 10, downloadButton("scatter_download")),
                            plotlyOutput("keyword_dynamic_plot"),
                            dataTableOutput("filter_selected_tab1"),
-                           downloadButton("data_download_tab1"),
+                           # downloadButton("data_download_tab1"),
                            value = 1),
                   tabPanel("Volume Over Time",
-                           absolutePanel(top = 10, right = 10, downloadButton("vot_download")),
+                           # absolutePanel(top = 10, right = 10, downloadButton("vot_download")),
                            plotlyOutput("vot_plot"), dataTableOutput("filter_selected_tab2"),
                            downloadButton("data_download_tab2"), value = 2),
                   id = "chart_type")
