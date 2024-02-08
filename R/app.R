@@ -187,7 +187,7 @@ $(document).on('shiny:connected', function(event) {
         tidytext::unnest_tokens(word, keyword, drop = FALSE) %>%
         dplyr::group_by(word) %>%
         dplyr::filter(!word %in% tm::stopwords(kind = "SMART")) %>%
-        dplyr::mutate(n=n())
+        dplyr::mutate(n=dplyr::n())
     })
 
   hover_df <- shiny::reactive({
