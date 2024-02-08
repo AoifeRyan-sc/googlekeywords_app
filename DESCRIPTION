@@ -1,4 +1,4 @@
-Package: keywordAnalysis
+Package: keywordApp
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
@@ -16,7 +16,6 @@ Imports:
     janitor,
     magrittr,
     plotly,
-    readr,
     readxl,
     rlang,
     shiny,
@@ -25,5 +24,6 @@ Imports:
     tidyselect,
     tidytext,
     tm,
+    utils,
     viridis,
     vroom

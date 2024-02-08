@@ -395,21 +395,21 @@ $(document).on('shiny:connected', function(event) {
              yaxis = list(title = "Number of Searches"))
   })
 
-  output$data_download_tab1 <- downloadHandler(
+  output$data_download_tab1 <- shiny::downloadHandler(
     filename = function() {
       paste0("selected_data_", format(Sys.time(), "%d-%m-%Y_%H:%M:%S"), ".csv")
     },
     content = function(file) {
-      write.csv(display_table(), file, row.names = FALSE)
+      utils::write.csv(display_table(), file, row.names = FALSE)
     }
   )
   
-  output$data_download_tab2 <- downloadHandler(
+  output$data_download_tab2 <- shiny::downloadHandler(
     filename = function() {
       paste0("selected_data_", format(Sys.time(), "%d-%m-%Y_%H.%M.%S"), ".csv")
     },
     content = function(file) {
-      write.csv(display_table(), file, row.names = FALSE)
+      utils::write.csv(display_table(), file, row.names = FALSE)
     }
   )
   
