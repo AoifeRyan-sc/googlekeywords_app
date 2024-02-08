@@ -55,7 +55,7 @@ $(document).on('shiny:connected', function(event) {
 "
 # ----
 
-run_app <- function{
+run_app <- function(){
   
   ui <- fluidPage(
     
@@ -96,7 +96,6 @@ run_app <- function{
       # Show a plot of the generated distribution
       mainPanel(
         shiny::tabsetPanel(type = "tabs",
-                           tabPanel("hover chart", dataTableOutput("hover_chart")),
                            tabPanel("Dynamic Chart",
                                     # absolutePanel(top = 10, right = 10, downloadButton("scatter_download")),
                                     plotlyOutput("keyword_dynamic_plot"),
@@ -116,10 +115,6 @@ run_app <- function{
   
   # Define server logic required to draw a histogram
   server <- function(input, output, session) {
-    
-    output$hover_chart <- renderDataTable({
-      hover_df()
-    })
     
     # Reactive values ----
     data <- reactive({
