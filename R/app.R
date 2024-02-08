@@ -4,7 +4,7 @@
 #' @return launches app in which you can upload data exported from google keywords for analysis
 #' @export
 #'
-#' @examples run_app()
+#' @examples \dontrun{run_app()}
 run_app <- function(){
  
   # logifySlider javascript function ----
@@ -210,7 +210,7 @@ $(document).on('shiny:connected', function(event) {
     }
 
     hover_info <- plot_df %>%
-      dplyr::group_by(x,y) %>% dplyr::mutate(group_number = dplyr::cur_group_id(), n = n()) %>%
+      dplyr::group_by(x,y) %>% dplyr::mutate(group_number = dplyr::cur_group_id(), n = dplyr::n()) %>%
       dplyr::slice(1:3) %>%
       dplyr::mutate(combined_info = dplyr::case_when(n > 3 ~
                                          paste0("<b>Keyword (Average monthly searches):</b> ",

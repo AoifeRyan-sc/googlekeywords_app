@@ -13,5 +13,5 @@ launches app in which you can upload data exported from google keywords for anal
 Call function to launch app
 }
 \examples{
-run_app()
+\dontrun{run_app()}
 }
