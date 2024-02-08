@@ -18,7 +18,7 @@ You can install the development version of keywordAnalysis from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("AoifeRyan-sc/keywordApp")
+devtools::install_github("AoifeRyan-sc/keywordAnalysis")
 ```
 
 ## Launching the App

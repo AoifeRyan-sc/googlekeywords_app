@@ -34,7 +34,7 @@ devtools::install_github("AoifeRyan-sc/keywordAnalysis")
 Launching the app is quite straightforward:
 
 ```{r example, eval = FALSE}
-keywordAnalysis::run_app()
+keywordApp::run_app()
 ```
 
 Once you have launched the app you should upload your dataset by clicking the "Browse" button on the top left corner of the page. Datasets should be csv, tsv, or xlsx.
