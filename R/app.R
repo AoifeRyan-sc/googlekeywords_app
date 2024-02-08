@@ -3,77 +3,7 @@ library(shiny)
 library(plotly)
 library(tidyverse)
 library(DT)
-# 
-# df <- readxl::read_xlsx("~/Library/CloudStorage/GoogleDrive-aoife.ryan@sharecreative.com/.shortcut-targets-by-id/0BwEyzS8OvJgreXdPNGZKV2tyRjg/Share_Clients/data_science_project_work/google_keywords_analysis/data/USA - Keyword Stats 2024-01-16 at 09_12_04.xlsx") %>%
-#   janitor::row_to_names(row_number = 36, remove_rows_above = FALSE) %>% # column names
-#   janitor::clean_names() %>%
-#   filter(avg_monthly_searches != 0) %>%
-#   mutate_at(15:26, as.numeric) %>% # monthly searches stored as character
-#   mutate(yo_y_change = as.numeric(str_remove_all(yo_y_change, "%")),
-#          three_month_change = as.numeric(str_remove_all(three_month_change, "%")),
-#          # yo_y_change = yo_y_change/100,
-#          # three_month_change = three_month_change/100,
-#          avg_monthly_searches = as.numeric(avg_monthly_searches),
-#          log_avg_posts = log(avg_monthly_searches)) %>%
-#   dplyr::select(-c(competition:in_plan))
-# 
-# df <- df%>%
-#   mutate(total2023 = rowSums(df %>% dplyr::select(searches_jan_2023:searches_dec_2023),
-#                              na.rm = TRUE)) %>%# add a total searches column
-#   rename_with(~sub("searches_(\\w+)_2023", "\\1", .), starts_with("searches_")) %>%
-#   drop_na()
 
-# end of df load ----
-rand_coord <- function(n, xmin, xmax, ymin, ymax, min_distance) {
-  set.seed(12)
-  # result <- numeric(n)
-  result <- data.frame(x = numeric(), y = numeric())
-  
-  if (n > 0){
-    for (i in 1:n){
-      
-      if (i == 1){
-        attempt <- 0
-        repeat {
-          coord <- data.frame(x = runif(1, xmin, xmax), y = runif(1, ymin, ymax))
-          if (abs(coord[1] - 0) > 20 & abs(coord[2] - 0) > 20){
-            result[i,] <- coord
-            break
-          }
-          
-          attempts <- attempts + 1
-          if (attempts > 100){
-            warning("Unable to find a suitable number, adjust parameters.")
-            result[i,] <- coord
-            break
-          }
-        }
-        
-      } else {
-        attempts <- 0
-        
-        repeat {
-          coord <- data.frame(x = runif(1, xmin, xmax), y = runif(1, ymin, ymax))
-          
-          if (all(abs(dist(rbind(result,coord))) > min_distance) &
-              abs(coord[1] - 0) > 20 & abs(coord[2] - 0) > 20){
-            result <- rbind(result, coord)
-            break
-          } 
-          attempts <- attempts + 1
-          if (attempts > 100){
-            warning("Unable to find a suitable number, adjust parameters.")
-            result <- rbind(result, coord)
-            break
-          }
-        }
-      }
-      
-    }
-  }
-  # return(data.frame(result))
-  return(result)
-}
 rand_coord_opt2 <- function(n, xmin, xmax, ymin, ymax, min_distance, random_state = 12) {
   set.seed(random_state)
   # result <- numeric(n)
@@ -193,8 +123,7 @@ ui <- fluidPage(
   tags$head(tags$script(HTML(JS.logify))),
   tags$head(tags$script(HTML(JS.onload))),
   tags$head(tags$script(HTML(JS.sendCustomMessage))),
-  # tags$head(tags$script(HTML(JS.observeSliderChange))),
-  
+
   # Application title
   titlePanel("Explore Google Search Data"),
   
