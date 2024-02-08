@@ -9,7 +9,7 @@ rand_coord_opt2 <- function(n, xmin, xmax, ymin, ymax, min_distance, random_stat
       if (i == 1){
         attempts <- 0
         repeat {
-          coord <- data.frame(x = runif(1, xmin, xmax), y = runif(1, ymin, ymax))
+          coord <- data.frame(x = stats::runif(1, xmin, xmax), y = stats::runif(1, ymin, ymax))
           if (abs(coord[2] - 0) > 20){
             result[i,] <- coord
             break
@@ -27,7 +27,7 @@ rand_coord_opt2 <- function(n, xmin, xmax, ymin, ymax, min_distance, random_stat
         attempts <- 0
         
         repeat {
-          coord <- data.frame(x = runif(1, xmin, xmax), y = runif(1, ymin, ymax))
+          coord <- data.frame(x = stats::runif(1, xmin, xmax), y = stats::runif(1, ymin, ymax))
           
           if (all(apply(result, 1, function(row) abs(coord - row) > min_distance))&
               abs(coord[2] - 0) > 40){
