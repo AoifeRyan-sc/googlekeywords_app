@@ -1,12 +1,12 @@
 
-
+#' Call function to launch app
+#'
+#' @return launches app in which you can upload data exported from google keywords for analysis
+#' @export
+#'
+#' @examples run_app()
 run_app <- function(){
-  # load df and libraries ----
-  library(shiny)
-  library(plotly)
-  library(tidyverse)
-  library(DT)
-  
+ 
   # logifySlider javascript function ----
   JS.logify <-
     "
@@ -142,12 +142,12 @@ $(document).on('shiny:connected', function(event) {
 
     })
 
-    observe({
+    shiny::observe({
       # dropdowns
       keyword_choices <- unique(data()$keyword)
       grouping_choices <- group_info() %>%
         dplyr::filter(!word %in% tm::stopwords(kind = "SMART")) %>%
-        arrange(desc(n)) %>% pull(word) %>% unique()
+        dplyr::arrange(dplyr::desc(n)) %>% dplyr::pull(word) %>% unique()
 
       shiny::updateSelectInput(inputId = "keyword", choices = keyword_choices)
       shiny::updateSelectInput(inputId = "static_keyword_callout", choices = keyword_choices)
@@ -162,8 +162,8 @@ $(document).on('shiny:connected', function(event) {
 
     })
 
-    observeEvent(input$data_upload, {
-      max_searches <- max(data() %>% select(avg_monthly_searches, jan:dec))
+    shiny::observeEvent(input$data_upload, {
+      max_searches <- max(data() %>% dplyr::select(avg_monthly_searches, jan:dec))
       normaliser <- 10^(floor(log10(abs(max_searches))))
       adjusted_max_searches <- ceiling(max_searches/normaliser)*normaliser
       max_xval <- floor(log10(adjusted_max_searches))
@@ -183,7 +183,7 @@ $(document).on('shiny:connected', function(event) {
 
     group_info <- shiny::reactive({
       data() %>%
-        select(keyword) %>%
+        dplyr::select(keyword) %>%
         tidytext::unnest_tokens(word, keyword, drop = FALSE) %>%
         dplyr::group_by(word) %>%
         dplyr::filter(!word %in% tm::stopwords(kind = "SMART")) %>%
@@ -197,51 +197,51 @@ $(document).on('shiny:connected', function(event) {
 
     if(length(input$keyword)>0){
       plot_df <- data() %>%
-        arrange(log_avg_posts) %>%
-        dplyr::mutate(rowid = row_number()) %>%
+        dplyr::arrange(log_avg_posts) %>%
+        dplyr::mutate(rowid = dplyr::row_number()) %>%
         dplyr::filter(keyword %in% input$keyword) %>%
         dplyr::mutate(x = !!x_var, y = !!y_var)
     } else {
       plot_df <- data() %>%
-        arrange(log_avg_posts) %>%
-        dplyr::mutate(rowid = row_number(),
+        dplyr::arrange(log_avg_posts) %>%
+        dplyr::mutate(rowid = dplyr::row_number(),
                x = !!x_var, y = !!y_var)
 
     }
 
     hover_info <- plot_df %>%
       dplyr::group_by(x,y) %>% dplyr::mutate(group_number = dplyr::cur_group_id(), n = n()) %>%
-      slice(1:3) %>%
-      dplyr::mutate(combined_info = case_when(n > 3 ~
+      dplyr::slice(1:3) %>%
+      dplyr::mutate(combined_info = dplyr::case_when(n > 3 ~
                                          paste0("<b>Keyword (Average monthly searches):</b> ",
                                                 paste0("<br>", paste0(keyword, " (", avg_monthly_searches, ")", collapse = ", "), "...")),
                                        TRUE ~
                                          paste0("<b>Keyword (Average monthly searches):</b> ", "<br>",
                                                 paste0(keyword, " (", avg_monthly_searches, ")", collapse = ", ")))) %>%
-      ungroup() %>% select(group_number, combined_info) %>% distinct()
+      dplyr::ungroup() %>% dplyr::select(group_number, combined_info) %>% dplyr::distinct()
 
     if(length(input$grouping_variable > 0)){
 
       keywords_to_highlight <- group_info() %>%
         dplyr::filter(word %in% input$grouping_variable) %>%
         dplyr::group_by(keyword) %>%
-        arrange(word) %>%
-        distinct(keyword, word) %>%
+        dplyr::arrange(word) %>%
+        dplyr::distinct(keyword, word) %>%
         dplyr::mutate(group_var = paste0(word, collapse = ", "))
 
       joined_df <- plot_df %>%
         dplyr::group_by(x,y) %>% dplyr::mutate(group_number = dplyr::cur_group_id()) %>%
-        left_join(hover_info, by = "group_number") %>% ungroup() %>%
-        left_join(keywords_to_highlight %>% select(keyword, group_var), by = "keyword") %>%
-        # dplyr::mutate(selected_terms = case_when(keyword %in% keywords_to_highlight ~ input$grouping_variable, TRUE ~ "Other")) %>%
-        dplyr::mutate(group_var = if_else(is.na(group_var), "Other", group_var)) %>%
-        dplyr::mutate(rowid = row_number())
+        dplyr::left_join(hover_info, by = "group_number") %>% dplyr::ungroup() %>%
+        dplyr::left_join(keywords_to_highlight %>% dplyr::select(keyword, group_var), by = "keyword") %>%
+        # dplyr::mutate(selected_terms = dplyr::case_when(keyword %in% keywords_to_highlight ~ input$grouping_variable, TRUE ~ "Other")) %>%
+        dplyr::mutate(group_var = dplyr::if_else(is.na(group_var), "Other", group_var)) %>%
+        dplyr::mutate(rowid = dplyr::row_number())
     } else {
       joined_df <- plot_df %>%
         dplyr::group_by(x,y) %>% dplyr::mutate(group_number = dplyr::cur_group_id()) %>%
-        left_join(hover_info, by = "group_number") %>% dplyr::ungroup() %>%
+        dplyr::left_join(hover_info, by = "group_number") %>% dplyr::ungroup() %>%
         dplyr::mutate(group_var = 1) %>%
-        dplyr::mutate(rowid = row_number())
+        dplyr::mutate(rowid = dplyr::row_number())
     }
 
 
@@ -273,7 +273,7 @@ $(document).on('shiny:connected', function(event) {
 
   df_longer <- shiny::reactive({
     hover_df()[hover_df()$rowid %in% df_highlighted()$customdata, ] %>%
-      pivot_longer(jan:dec, values_to = "n", names_to = "month") %>%
+      tidyr::pivot_longer(jan:dec, values_to = "n", names_to = "month") %>%
       dplyr::mutate(date = as.Date(paste0("01-", stringr::str_to_title(month), "-2022"), format = "%d-%b-%Y")) %>%
       dplyr::group_by(keyword)
 
@@ -281,7 +281,7 @@ $(document).on('shiny:connected', function(event) {
 
   basic_scatter <- shiny::reactive({
 
-    plot_ly(data = hover_df(), x = ~x, y = ~y,
+    plotly::plot_ly(data = hover_df(), x = ~x, y = ~y,
             type = "scatter", mode = "markers",
             # color = ~log_avg_posts,
             color = ~as.factor(group_var),
@@ -298,7 +298,7 @@ $(document).on('shiny:connected', function(event) {
                           line = list(color = "black",
                                       width = 0.5)
             )) %>%
-      layout(
+      plotly::layout(
         dragmode = "lasso",
         shapes = list(hline(0)),
         margin = list(b=100),
@@ -317,7 +317,7 @@ $(document).on('shiny:connected', function(event) {
           text = "<b>Word(s) in search term:</b>",
           font = list(size = 12)
         ) )) %>%
-      add_annotations(text = "<span style='font-style:italic;text-decoration:underline;'>Note:</span><span style='font-style:italic;'> Bubble size corresponds to average monthly searches, a larger bubble represents a larger average monthly search</span>\n<span style='font-style:italic;'>*This is a logarithmic scale, values 1, 10, 100, 1000 etc. are equally spaced on the graph.\nA log scale means that that keywords with 0 posts will not be displayed as points on the graph</span>",
+      plotly::add_annotations(text = "<span style='font-style:italic;text-decoration:underline;'>Note:</span><span style='font-style:italic;'> Bubble size corresponds to average monthly searches, a larger bubble represents a larger average monthly search</span>\n<span style='font-style:italic;'>*This is a logarithmic scale, values 1, 10, 100, 1000 etc. are equally spaced on the graph.\nA log scale means that that keywords with 0 posts will not be displayed as points on the graph</span>",
                       # "*",
                       xref = "paper", yref = "paper",
                       x = 0.5, y = -0.35, size = 3, showarrow = FALSE,
@@ -400,18 +400,21 @@ $(document).on('shiny:connected', function(event) {
       "data.csv"
     },
     content = function(file) {
-      readr::write.csv(display_table(), file)
+      time <- stringr::str_replace(Sys.time(), " ", "_")
+      readr::write_csv(paste0(display_table(), time), file)
     }
   )
-
-  output$data_download_tab2 <- shiny::downloadHandler(
+  
+  output$data_download_tab2<- shiny::downloadHandler(
     filename = function() {
       "data.csv"
     },
     content = function(file) {
-      readr::write.csv(display_table(), file)
+      time <- stringr::str_replace(Sys.time(), " ", "_")
+      readr::write_csv(paste0(display_table(), time), file)
     }
   )
+  
 
     # end ----
     
