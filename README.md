@@ -18,7 +18,7 @@ You can install the development version of keywordAnalysis from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("AoifeRyan-sc/keywordAnalysis")
+devtools::install_github("AoifeRyan-sc/keywordApp")
 ```
 
 ## Launching the App
@@ -26,7 +26,7 @@ devtools::install_github("AoifeRyan-sc/keywordAnalysis")
 Launching the app is quite straightforward:
 
 ``` r
-keywordAnalysis::run_app()
+keywordApp::run_app()
 ```
 
 Once you have launched the app you should upload your dataset by
