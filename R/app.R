@@ -287,13 +287,13 @@ $(document).on('shiny:connected', function(event) {
             color = ~as.factor(group_var),
             customdata = ~rowid,
             size = ~log_avg_posts, sizes = c(5, 30),
-            # colors = viridis::viridis_pal(option = "A")(n_distinct(hover_df()$group_var)),
+            # colors = viridis::viridis_pal(option = "A", begin = 0.08, end = 0.92)(dplyr::n_distinct(hover_df()$group_var)),
             hoverinfo = "text",
             text = ~combined_info,
             marker = list(opacity = 0.5,
                           # size = 12,
                           showscale = FALSE,
-                          showlegend = TRUE,
+                          showlegend = FALSE,
                           sizemode = "diameter",
                           line = list(color = "black",
                                       width = 0.5)
@@ -316,7 +316,8 @@ $(document).on('shiny:connected', function(event) {
         legend = list(title = list(
           text = "<b>Word(s) in search term:</b>",
           font = list(size = 12)
-        ) )) %>%
+        ),
+        itemsizing = "constant")) %>%
       plotly::add_annotations(text = "<span style='font-style:italic;text-decoration:underline;'>Note:</span><span style='font-style:italic;'> Bubble size corresponds to average monthly searches, a larger bubble represents a larger average monthly search</span>\n<span style='font-style:italic;'>*This is a logarithmic scale, values 1, 10, 100, 1000 etc. are equally spaced on the graph.\nA log scale means that that keywords with 0 posts will not be displayed as points on the graph</span>",
                       # "*",
                       xref = "paper", yref = "paper",
